@@ -19,22 +19,22 @@ export default class Network extends Component {
         if ('manipulation' in options && 'enabled' in options['manipulation'] &&
          options['manipulation']['enabled'] == true ) {
             if ('addNode' in options['manipulation']) {
-                console.log(options['manipulation']['addNode'])
+                console.log('manipulation addNode: ', options['manipulation']['addNode'])
                 newOptions['manipulation']['addNode'] = window[options['manipulation']['addNode']]
             }
             if ('addEdge' in options['manipulation']) {
-                console.log(options['manipulation']['addEdge'])
+                console.log('manipulation addEdge: ',options['manipulation']['addEdge'])
                 newOptions['manipulation']['addEdge'] = window[options['manipulation']['addEdge']]
             }
             if ('editNode' in options['manipulation']) {
-                console.log(options['manipulation']['editNode'])
+                console.log('manipulation editNode: ',options['manipulation']['editNode'])
                 newOptions['manipulation']['editNode'] = window[options['manipulation']['editNode']]
             }
             if ('editEdge' in options['manipulation']) {
                 var obj = options['manipulation']['editEdge'];
-                console.log(options['manipulation']['editEdge']);
+                console.log('manipulation editEdge: ',options['manipulation']['editEdge']);
                 if (typeof obj === 'string' || obj instanceof String) {
-                  newOptions['manipulation']['editEdge'] = window[options['manipulation']['editEdge']];
+                  newOptions['manipulation']['edit  Edge'] = window[options['manipulation']['editEdge']];
                 } else {
                    if (typeof obj === 'object' && 'editWithoutDrag' in obj) {
                      newOptions['manipulation']['editEdge']['editWithoutDrag'] =
@@ -47,17 +47,89 @@ export default class Network extends Component {
             console.log('newOptions')
             console.log(newOptions)
          }
+
+        this.nn.on('*', function (event, properties, senderId) {
+          this.setState((state, curProps) => {
+            console.log('nodes current state ', state);
+            console.log('nodes current props ', curProps);
+            console.log('nodes state event ', event, properties);
+            if (event === 'add') {
+              console.log('nodes add event');
+              var arrayLength = properties.items.length;
+              var avail_id_nodes = curProps.data.nodes.map(function(x) {return x.id })
+              for (var i = 0; i < arrayLength; i++) {
+                if (avail_id_nodes.indexOf(properties.items[i]) == -1){
+                  curProps.data.nodes.push(this.nn.get(properties.items[i]));
+                }
+              }
+            } else {
+              if (event === 'update') {
+                console.log('nodes update event ');
+                var currentLength = curProps.data.nodes.length;
+                for (var i = 0; i < currentLength; i++) {
+                  var idx = properties.items.indexOf(curProps.data.nodes[i]['id']);
+                  if (idx !== -1) {
+                    curProps.data.nodes[i] = properties.data[idx];
+                  }
+                }
+              } else {
+                console.log('nodes delete event ', event);
+                curProps.data.nodes = curProps.data.nodes.filter(function(x){
+                  return properties.items.indexOf(x) == -1 })
+              }
+            }
+            console.log('new props ', curProps);
+            return { id: curProps.id, data: curProps.data,
+              options: curProps.options, moveTo: curProps.moveTo,
+              fit: curProps.fit, focus: curProps.focus, setProps: curProps.setProps}
+            });
+        }.bind(this) );
+
+        this.ee.on('*', function (event, properties, senderId) {
+          this.setState((state, curProps) => {
+            console.log('edges state event ', event, properties);
+            if (event === 'add') {
+              var arrayLength = properties.items.length;
+              var avail_id_edges = curProps.data.edges.map(function(x) {return x.id })
+              for (var i = 0; i < arrayLength; i++) {
+                if (avail_id_edges.indexOf(properties.items[i]) == -1){
+                  curProps.data.edges.push(this.ee.get(properties.items[i]));
+                }
+              }
+            } else {
+              if (event === 'update') {
+                var currentLength = curProps.data.edges.length;
+                for (var i = 0; i < currentLength; i++) {
+                  var idx = properties.items.indexOf(curProps.data.edges[i]['id']);
+                  if (idx !== -1) {
+                    curProps.data.edges[i] = properties.data[idx];
+                  }
+                }
+              } else {
+                curProps.data.edges = curProps.data.edges.filter(function(x){
+                  return properties.items.indexOf(x) == -1 })
+              }
+            }
+            console.log('new props ', curProps);
+            return { id: curProps.id, data: curProps.data,
+              options: curProps.options, moveTo: curProps.moveTo,
+              fit: curProps.fit, focus: curProps.focus, setProps: curProps.setProps}
+            });
+        }.bind(this));
+
         this.net = new vis.Network(gd, {nodes: this.nn, edges: this.ee}, newOptions)
         this.net.addEventListener('select', function(x){ 
             if (setProps) setProps({selection:{'nodes':x.nodes, 'edges':x.edges}})
         })
+
         if (moveTo.Is_used != false) this.net.moveTo( moveTo ) 
         if (fit.Is_used != false) this.net.fit( fit ) 
         if (focus.Is_used != false) this.net.focus( focus.nodeId, focus.options) 
     }
     
     componentWillReceiveProps(nextProps) {    
-        if (this.props.data !== nextProps.data){ 
+        if (this.props.data !== nextProps.data){
+            console.log("updating data ", nextProps.data);
             var new_id_nodes = nextProps.data.nodes.map(function(x) {return x.id })
             var remove_aim_nodes = this.nn.getIds().filter(function(x){ return new_id_nodes.indexOf(x) == -1 })
             this.nn.remove(remove_aim_nodes)
