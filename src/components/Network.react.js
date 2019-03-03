@@ -12,10 +12,42 @@ export default class Network extends Component {
         
     componentDidMount() {
         const {id, data, options, moveTo, fit, focus, setProps} = this.props;    
-        var gd = document.getElementById(id);      
+        var gd = document.getElementById(id);
+        var newOptions = options ;
         this.nn.add(data.nodes)
         this.ee.add(data.edges)
-        this.net = new vis.Network(gd, {nodes: this.nn, edges: this.ee}, options)  
+        if ('manipulation' in options && 'enabled' in options['manipulation'] &&
+         options['manipulation']['enabled'] == true ) {
+            if ('addNode' in options['manipulation']) {
+                console.log(options['manipulation']['addNode'])
+                newOptions['manipulation']['addNode'] = window[options['manipulation']['addNode']]
+            }
+            if ('addEdge' in options['manipulation']) {
+                console.log(options['manipulation']['addEdge'])
+                newOptions['manipulation']['addEdge'] = window[options['manipulation']['addEdge']]
+            }
+            if ('editNode' in options['manipulation']) {
+                console.log(options['manipulation']['editNode'])
+                newOptions['manipulation']['editNode'] = window[options['manipulation']['editNode']]
+            }
+            if ('editEdge' in options['manipulation']) {
+                var obj = options['manipulation']['editEdge'];
+                console.log(options['manipulation']['editEdge']);
+                if (typeof obj === 'string' || obj instanceof String) {
+                  newOptions['manipulation']['editEdge'] = window[options['manipulation']['editEdge']];
+                } else {
+                   if (typeof obj === 'object' && 'editWithoutDrag' in obj) {
+                     newOptions['manipulation']['editEdge']['editWithoutDrag'] =
+                     window[options['manipulation']['editEdge']['editWithoutDrag']];
+                   } else {
+                     delete newOptions['manipulation']['editEdge'];
+                   }
+                }
+            }
+            console.log('newOptions')
+            console.log(newOptions)
+         }
+        this.net = new vis.Network(gd, {nodes: this.nn, edges: this.ee}, newOptions)
         this.net.addEventListener('select', function(x){ 
             if (setProps) setProps({selection:{'nodes':x.nodes, 'edges':x.edges}})
         })
