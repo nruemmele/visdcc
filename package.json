@@ -1,6 +1,6 @@
 {
   "name": "visdcc",
-  "version": "0.0.34",
+  "version": "0.1.0",
   "main": "build/index.js",
   "scripts": {
     "start": "webpack-serve ./webpack.serve.config.js --open",
