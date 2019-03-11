@@ -2,6 +2,7 @@
 Dash Core Components for Visualization.
 
 - [Installing](#installing-)
+- [Build componet](#build)
 - [Requirements](#requirements)
 - [Usage](#usage-)
   - [visdcc.Network](#1-visdccnetwork-)
@@ -12,10 +13,22 @@ Dash Core Components for Visualization.
     - [Plot basic table and get selected cell](#plot-basic-table-and-get-selected-cell-)
 - [Learning more about dash ...](#dash)  
 
+# Build
+```
+npm run build:js
+```
+
+Rename `visdcc.min.js` in the folder [visdcc](visdcc/) to `bundle.js`.
+Then install as a main python library.
+
 # Installing :
+The official version from `pypi` can be installed via:
 ```
 pip install visdcc
 ```
+
+The new version:
+```pip install .```
 
 # Requirements：
 
