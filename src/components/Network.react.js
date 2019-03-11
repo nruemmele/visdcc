@@ -73,9 +73,8 @@ export default class Network extends Component {
                   }
                 }
               } else {
-                console.log('nodes delete event ', event);
                 curProps.data.nodes = curProps.data.nodes.filter(function(x){
-                  return properties.items.indexOf(x) == -1 })
+                  return properties.items.indexOf(x['id']) == -1 })
               }
             }
             console.log('new props ', curProps);
@@ -107,7 +106,7 @@ export default class Network extends Component {
                 }
               } else {
                 curProps.data.edges = curProps.data.edges.filter(function(x){
-                  return properties.items.indexOf(x) == -1 })
+                  return properties.items.indexOf(x['id']) == -1 })
               }
             }
             console.log('new props ', curProps);
